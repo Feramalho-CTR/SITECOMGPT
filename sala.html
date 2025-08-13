@@ -494,13 +494,6 @@
             console.error("Erro ao obter o título do vídeo:", e);
         }
         event.target.setVolume(30);
-
-        // Adiciona o listener de clique após o player estar pronto
-        document.addEventListener('click', () => {
-            if (musicaStatusFirebase === 'tocando') {
-                tocarMusicaFundo();
-            }
-        }, { once: true });
     }
     
     function pausarMusicaFundo() {
@@ -553,9 +546,7 @@
                 if (alunosSorteados[alunos[i]]) {
                     desk.classList.add('sorteado');
                 }
-                if (alunos[i] === ultimoSorteado) {
-                    desk.classList.add('piscar');
-                }
+                
             } else {
                 chair.textContent = i + 1;
                 chair.style.color = '#8899a6';
@@ -743,13 +734,6 @@
         sortearBtn.style.display = 'none';
         btnEncerrarSala.style.display = 'none';
         btnMusica.style.display = 'none';
-
-        // Lógica para alunos: Tocar música na primeira interação, se o status for "tocando"
-        document.addEventListener('click', () => {
-            if (musicaStatusFirebase === 'tocando') {
-                tocarMusicaFundo();
-            }
-        }, { once: true });
     }
 
     function init() {
@@ -773,9 +757,27 @@
                 atualizarHeader(salaEncontrada);
                 alunos = buscarAlunos(salaEncontrada);
                 alunosSorteados = salaEncontrada.alunosSorteados || {};
-                ultimoSorteado = salaEncontrada.ultimoSorteado || null;
-                atualizarListaDeAlunos(alunos);
                 
+                // Salva o último sorteado antes de atualizar a lista de alunos
+                const ultimoSorteadoAnterior = ultimoSorteado;
+                ultimoSorteado = salaEncontrada.ultimoSorteado || null;
+                
+                atualizarListaDeAlunos(alunos);
+
+                // --- Lógica para o card de piscar do último sorteado ---
+                const desks = document.querySelectorAll('.desk');
+                // Remove a classe de piscar de todas as mesas
+                desks.forEach(desk => desk.classList.remove('piscar'));
+                
+                // Se houver um último sorteado, adiciona a classe de piscar na mesa correspondente
+                if (ultimoSorteado && !animacaoEmAndamento) {
+                    const deskDoSorteado = Array.from(desks).find(d => d.querySelector('.chair').textContent === ultimoSorteado);
+                    if (deskDoSorteado) {
+                        deskDoSorteado.classList.add('piscar');
+                    }
+                }
+                // --- Fim da lógica do card de piscar ---
+
                 // Lógica para sincronizar música
                 musicaStatusFirebase = salaEncontrada.musicaStatus || 'pausada';
                 if (musicaStatusFirebase === 'tocando') {
@@ -785,7 +787,6 @@
                 }
                 
                 const sorteandoAluno = salaEncontrada.sorteando || null;
-                const desks = document.querySelectorAll('.desk');
                 desks.forEach(desk => desk.classList.remove('sorteando'));
 
                 if (sorteandoAluno) {
@@ -826,6 +827,7 @@
     }
 
     init();
+</script>
 </script>
 </body>
 
