@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,24 +16,28 @@
             height: 100vh;
             padding: 0 20px;
         }
+
         h1 {
             margin-bottom: 20px;
             color: #333;
         }
+
         form {
             background: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             width: 100%;
             max-width: 400px;
         }
+
         label {
             display: block;
             margin-top: 15px;
             font-weight: bold;
             color: #555;
         }
+
         input[type="text"] {
             width: 100%;
             padding: 10px;
@@ -41,6 +46,7 @@
             border: 1px solid #ccc;
             font-size: 16px;
         }
+
         button {
             margin-top: 25px;
             width: 100%;
@@ -53,14 +59,17 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #e07b39;
         }
+
         .error {
             color: red;
             margin-top: 10px;
             font-weight: bold;
         }
+
         #btnVoltar {
             margin-top: 15px;
             padding: 10px 20px;
@@ -72,11 +81,13 @@
             transition: background-color 0.3s ease;
             font-size: 14px;
         }
+
         #btnVoltar:hover {
             background-color: #555;
         }
     </style>
 </head>
+
 <body>
     <h1>Entrada do Aluno</h1>
     <form id="alunoForm">
@@ -91,55 +102,79 @@
 
     <button id="btnVoltar" onclick="location.href='index.html'">← Voltar ao Início</button>
 
-    <script>
-        function getSalas() {
-            const salasJSON = localStorage.getItem('salas');
-            return salasJSON ? JSON.parse(salasJSON) : {};
-        }
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { ref, get, update } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-        function saveSalas(salas) {
-            localStorage.setItem('salas', JSON.stringify(salas));
-        }
-
-        document.getElementById('alunoForm').addEventListener('submit', function(event) {
+        document.getElementById('alunoForm').addEventListener('submit', async function (event) {
             event.preventDefault();
             const nomeAluno = document.getElementById('nomeAluno').value.trim();
             const codigoSala = document.getElementById('codigoSala').value.trim();
             const errorMsg = document.querySelector('.error');
-            if(errorMsg) errorMsg.textContent = '';
+            if (errorMsg) errorMsg.textContent = '';
 
             if (!nomeAluno || !codigoSala) {
                 alert('Por favor, preencha todos os campos.');
                 return;
             }
 
-            const salas = getSalas();
+            const salaRef = ref(db, `salas`);
 
-            if (!salas[codigoSala]) {
-                alert('Código da sala não encontrado.');
-                return;
+            try {
+                const snapshot = await get(salaRef);
+
+                if (snapshot.exists()) {
+                    let salaEncontrada = null;
+                    snapshot.forEach((childSnapshot) => {
+                        const sala = childSnapshot.val();
+                        if (sala.codigo === codigoSala) {
+                            salaEncontrada = {
+                                key: childSnapshot.key,
+                                ...sala
+                            };
+                        }
+                    });
+
+                    if (!salaEncontrada) {
+                        alert('Código da sala não encontrado.');
+                        return;
+                    }
+
+                    if (salaEncontrada.alunos && salaEncontrada.alunos.includes(nomeAluno)) {
+                        window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=aluno`;
+                        return;
+                    }
+
+                    if (!salaEncontrada.alunos) {
+                        salaEncontrada.alunos = [];
+                    }
+
+                    if (salaEncontrada.alunos.length >= 30) {
+                        alert('Sala cheia! Não é possível entrar.');
+                        return;
+                    }
+
+                    salaEncontrada.alunos.push(nomeAluno);
+
+                    const salaKey = salaEncontrada.key;
+                    const salaAtualizada = {
+                        alunos: salaEncontrada.alunos
+                    };
+
+                    const salaRefKey = ref(db, `salas/${salaKey}`);
+                    await update(salaRefKey, salaAtualizada);
+
+                    window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=aluno`;
+
+                } else {
+                    alert('Nenhuma sala encontrada.');
+                }
+            } catch (error) {
+                console.error("Erro ao entrar na sala: ", error);
+                alert('Erro ao entrar na sala.');
             }
-
-            // Verifica se o aluno já está cadastrado
-            if (salas[codigoSala].alunos.includes(nomeAluno)) {
-                // Já está cadastrado, só redireciona
-                window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=aluno`;
-                return;
-            }
-
-            // Verifica se tem vaga (limite 30)
-            if (salas[codigoSala].alunos.length >= 30) {
-                alert('Sala cheia! Não é possível entrar.');
-                return;
-            }
-
-            // Adiciona o aluno na sala
-            salas[codigoSala].alunos.push(nomeAluno);
-            saveSalas(salas);
-
-            // Redireciona para a página da sala como aluno
-            window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=aluno`;
         });
     </script>
 </body>
+
 </html>

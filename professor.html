@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,24 +16,28 @@
             height: 100vh;
             padding: 0 20px;
         }
+
         h1 {
             margin-bottom: 20px;
             color: #333;
         }
+
         form {
             background: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             width: 100%;
             max-width: 400px;
         }
+
         label {
             display: block;
             margin-top: 15px;
             font-weight: bold;
             color: #555;
         }
+
         input[type="text"] {
             width: 100%;
             padding: 10px;
@@ -41,6 +46,7 @@
             border: 1px solid #ccc;
             font-size: 16px;
         }
+
         button {
             margin-top: 25px;
             width: 100%;
@@ -53,14 +59,17 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #357ae8;
         }
+
         .error {
             color: red;
             margin-top: 10px;
             font-weight: bold;
         }
+
         #btnVoltar {
             margin-top: 15px;
             padding: 10px 20px;
@@ -72,11 +81,13 @@
             transition: background-color 0.3s ease;
             font-size: 14px;
         }
+
         #btnVoltar:hover {
             background-color: #555;
         }
     </style>
 </head>
+
 <body>
     <h1>Entrada do Professor</h1>
     <form id="professorForm">
@@ -88,7 +99,10 @@
 
     <button id="btnVoltar" onclick="location.href='index.html'">← Voltar ao Início</button>
 
-    <script>
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { ref, push, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
         function gerarCodigoAleatorio(tamanho = 6) {
             const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let codigo = '';
@@ -98,16 +112,44 @@
             return codigo;
         }
 
-        function getSalas() {
-            const salasJSON = localStorage.getItem('salas');
-            return salasJSON ? JSON.parse(salasJSON) : {};
+        async function criarSalaNoFirebase(nomeSala, codigoSala) {
+            const salasRef = ref(db, 'salas');
+            try {
+                await push(salasRef, {
+                    nome: nomeSala,
+                    codigo: codigoSala,
+                    alunos: []
+                });
+                console.log('Sala criada no Firebase com sucesso!');
+                return true; // Indica que a sala foi criada com sucesso
+            } catch (error) {
+                console.error("Erro ao criar sala no Firebase: ", error);
+                alert('Erro ao criar sala no Firebase.');
+                return false; // Indica que a sala não foi criada
+            }
         }
 
-        function saveSalas(salas) {
-            localStorage.setItem('salas', JSON.stringify(salas));
+        async function salaExisteNoFirebase(codigoSala) {
+            const salasRef = ref(db, 'salas');
+            try {
+                const snapshot = await get(salasRef);
+                if (snapshot.exists()) {
+                    const salas = snapshot.val();
+                    for (const salaId in salas) {
+                        if (salas[salaId].codigo === codigoSala) {
+                            return true; // Sala já existe
+                        }
+                    }
+                }
+                return false; // Sala não existe
+            } catch (error) {
+                console.error("Erro ao verificar sala no Firebase: ", error);
+                alert('Erro ao verificar sala no Firebase.');
+                return true; // Assume que a sala existe para evitar duplicações em caso de erro
+            }
         }
 
-        document.getElementById('professorForm').addEventListener('submit', function(event) {
+        document.getElementById('professorForm').addEventListener('submit', async function (event) {
             event.preventDefault();
             const nomeSala = document.getElementById('nomeSala').value.trim();
 
@@ -116,25 +158,21 @@
                 return;
             }
 
-            const salas = getSalas();
-
-            // Gera código único (tenta até achar um código não usado)
+            // Gera código único
             let codigoSala;
             do {
                 codigoSala = gerarCodigoAleatorio();
-            } while (salas[codigoSala]);
+            } while (await salaExisteNoFirebase(codigoSala)); // Verifica no Firebase
 
-            // Cria a sala com lista vazia de alunos
-            salas[codigoSala] = {
-                nome: nomeSala,
-                alunos: []
-            };
-
-            saveSalas(salas);
+            // Cria a sala no Firebase
+            const salaCriada = await criarSalaNoFirebase(nomeSala, codigoSala);
 
             // Redireciona para sala com tipo=professor
-            window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=professor`;
+            if (salaCriada) {
+                window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=professor`;
+            }
         });
     </script>
 </body>
+
 </html>

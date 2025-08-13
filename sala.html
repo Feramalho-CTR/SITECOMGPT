@@ -1,229 +1,258 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sala de Aula</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #btnVoltar {
-      align-self: flex-start;
-      margin-bottom: 15px;
-      padding: 8px 16px;
-      background-color: #777;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-size: 14px;
-    }
-    #btnVoltar:hover {
-      background-color: #555;
-    }
-    header {
-      margin-bottom: 20px;
-      text-align: center;
-      width: 100%;
-      max-width: 540px;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #333;
-    }
-    header p {
-      margin: 5px 0 0;
-      font-size: 1.1rem;
-      color: #666;
-    }
-    .classroom {
-      display: grid;
-      grid-template-columns: repeat(6, 80px);
-      grid-gap: 15px 20px;
-      background: #d7e3f0;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 540px;
-    }
-    .desk {
-      background: #fff;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 8px;
-      cursor: default;
-      user-select: none;
-      transition: background-color 0.3s ease;
-    }
-    .desk.highlight {
-      background-color: #ffd54f;
-      border: 2px solid #ffb300;
-      font-weight: bold;
-      color: #663c00;
-    }
-    .table {
-      width: 100%;
-      height: 40px;
-      background: #8b9dc3;
-      border-radius: 4px;
-      margin-bottom: 6px;
-      box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);
-    }
-    .chair {
-      width: 40px;
-      height: 40px;
-      background: #f4f4f4;
-      border-radius: 6px;
-      border: 2px solid #6d84b4;
-      box-shadow: inset 0 2px 6px rgba(255,255,255,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      color: #333;
-    }
-    #sortearBtn {
-      margin-top: 20px;
-      padding: 12px 20px;
-      font-size: 18px;
-      cursor: pointer;
-      background-color: #4285F4;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      transition: background-color 0.3s ease;
-    }
-    #sortearBtn:hover {
-      background-color: #357ae8;
-    }
-    #alunoSorteado {
-      margin-top: 15px;
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #d2691e;
-      min-height: 30px;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sala de Aula</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #btnVoltar {
+            align-self: flex-start;
+            margin-bottom: 15px;
+            padding: 8px 16px;
+            background-color: #777;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+        }
+
+        #btnVoltar:hover {
+            background-color: #555;
+        }
+
+        header {
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 540px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .classroom {
+            display: grid;
+            grid-template-columns: repeat(6, 80px);
+            grid-gap: 15px 20px;
+            background: #d7e3f0;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 540px;
+        }
+
+        .desk {
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: default;
+            user-select: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .desk.highlight {
+            background-color: #ffd54f;
+            border: 2px solid #ffb300;
+            font-weight: bold;
+            color: #663c00;
+        }
+
+        .table {
+            width: 100%;
+            height: 40px;
+            background: #8b9dc3;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        }
+
+        .chair {
+            width: 40px;
+            height: 40px;
+            background: #f4f4f4;
+            border-radius: 6px;
+            border: 2px solid #6d84b4;
+            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        #sortearBtn {
+            margin-top: 20px;
+            padding: 12px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        #sortearBtn:hover {
+            background-color: #357ae8;
+        }
+
+        #alunoSorteado {
+            margin-top: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #d2691e;
+            min-height: 30px;
+        }
+    </style>
 </head>
+
 <body>
-  <button id="btnVoltar" onclick="location.href='index.html'">← Voltar ao Início</button>
+    <button id="btnVoltar" onclick="location.href='index.html'">← Voltar ao Início</button>
 
-  <header>
-    <h1 id="roomName">Sala: --</h1>
-    <p id="roomCode">Código da Sala: --</p>
-  </header>
+    <header>
+        <h1 id="roomName">Sala: --</h1>
+        <p id="roomCode">Código da Sala: --</p>
+    </header>
 
-  <div class="classroom" id="classroom">
-    <!-- Mesas e cadeiras geradas aqui -->
-  </div>
+    <div class="classroom" id="classroom">
+        <!-- Mesas e cadeiras geradas aqui -->
+    </div>
 
-  <button id="sortearBtn" style="display:none;">Sortear Aluno</button>
-  <div id="alunoSorteado"></div>
+    <button id="sortearBtn" style="display:none;">Sortear Aluno</button>
+    <div id="alunoSorteado"></div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const roomCode = params.get('codigo') || '----';
-    const tipo = params.get('tipo') || 'aluno'; // aluno ou professor
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { ref, onValue, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-    function buscarAlunos() {
-      const salas = JSON.parse(localStorage.getItem('salas') || '{}');
-      const sala = salas[roomCode];
-      return sala ? sala.alunos || [] : [];
-    }
+        const params = new URLSearchParams(window.location.search);
+        const roomCode = params.get('codigo') || '----';
+        const tipo = params.get('tipo') || 'aluno'; // aluno ou professor
 
-    function atualizarListaDeAlunos() {
-      const alunos = buscarAlunos();
-      const classroom = document.getElementById('classroom');
+        let salaRef;
+        let alunos = [];
 
-      // Limpa a lista
-      classroom.innerHTML = '';
+        function buscarAlunos(sala) {
+            return sala ? sala.alunos || [] : [];
+        }
 
-      for (let i = 0; i < 30; i++) {
-        const desk = document.createElement('div');
-        desk.classList.add('desk');
+        function atualizarListaDeAlunos(alunos) {
+            const classroom = document.getElementById('classroom');
 
-        const table = document.createElement('div');
-        table.classList.add('table');
+            // Limpa a lista
+            classroom.innerHTML = '';
 
-        const chair = document.createElement('div');
-        chair.classList.add('chair');
+            for (let i = 0; i < 30; i++) {
+                const desk = document.createElement('div');
+                desk.classList.add('desk');
 
-        if (alunos[i]) {
-          chair.textContent = alunos[i];
-          chair.style.color = '#333';
+                const table = document.createElement('div');
+                table.classList.add('table');
+
+                const chair = document.createElement('div');
+                chair.classList.add('chair');
+
+                if (alunos[i]) {
+                    chair.textContent = alunos[i];
+                    chair.style.color = '#333';
+                } else {
+                    chair.textContent = i + 1;
+                    chair.style.color = '#bbb';
+                }
+
+                desk.appendChild(table);
+                desk.appendChild(chair);
+                classroom.appendChild(desk);
+            }
+        }
+
+        // Atualiza os nomes da sala e código no header
+        function atualizarHeader(sala) {
+            const roomName = document.getElementById('roomName');
+            const roomCodeEl = document.getElementById('roomCode');
+
+            if (sala) {
+                roomName.textContent = `Sala: ${sala.nome}`;
+                roomCodeEl.textContent = `Código da Sala: ${roomCode}`;
+            } else {
+                roomName.textContent = 'Sala não encontrada';
+                roomCodeEl.textContent = `Código da Sala: ${roomCode}`;
+            }
+        }
+
+        function sortearAluno() {
+            if (alunos.length === 0) {
+                alert('Nenhum aluno cadastrado para sortear.');
+                return;
+            }
+
+            // Remove destaque antigo
+            document.querySelectorAll('.desk').forEach(d => d.classList.remove('highlight'));
+
+            const sorteadoIndex = Math.floor(Math.random() * alunos.length);
+            const desks = document.querySelectorAll('.desk');
+            desks[sorteadoIndex].classList.add('highlight');
+
+            alunoSorteadoDiv.textContent = `Aluno sorteado: ${alunos[sorteadoIndex]}`;
+        }
+
+        const sortearBtn = document.getElementById('sortearBtn');
+        const alunoSorteadoDiv = document.getElementById('alunoSorteado');
+
+        // Mostra botão só para professor
+        if (tipo === 'professor') {
+            sortearBtn.style.display = 'inline-block';
+
+            sortearBtn.onclick = () => {
+                sortearAluno();
+            };
         } else {
-          chair.textContent = i + 1;
-          chair.style.color = '#bbb';
+            sortearBtn.style.display = 'none';
         }
 
-        desk.appendChild(table);
-        desk.appendChild(chair);
-        classroom.appendChild(desk);
-      }
-    }
-
-    // Atualiza os nomes da sala e código no header
-    function atualizarHeader() {
-      const salas = JSON.parse(localStorage.getItem('salas') || '{}');
-      const sala = salas[roomCode];
-      const roomName = document.getElementById('roomName');
-      const roomCodeEl = document.getElementById('roomCode');
-
-      if (sala) {
-        roomName.textContent = `Sala: ${sala.nome}`;
-        roomCodeEl.textContent = `Código da Sala: ${roomCode}`;
-      } else {
-        roomName.textContent = 'Sala não encontrada';
-        roomCodeEl.textContent = `Código da Sala: ${roomCode}`;
-      }
-    }
-
-    atualizarHeader();
-    atualizarListaDeAlunos();
-
-    const sortearBtn = document.getElementById('sortearBtn');
-    const alunoSorteadoDiv = document.getElementById('alunoSorteado');
-
-    // Mostra botão só para professor
-    if (tipo === 'professor') {
-      sortearBtn.style.display = 'inline-block';
-
-      sortearBtn.onclick = () => {
-        const alunos = buscarAlunos();
-        if (alunos.length === 0) {
-          alert('Nenhum aluno cadastrado para sortear.');
-          return;
+        // Inicialização e Listener do Firebase
+        function init() {
+            salaRef = ref(db, 'salas');
+            onValue(salaRef, (snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    const sala = childSnapshot.val();
+                    if (sala.codigo === roomCode) {
+                        atualizarHeader(sala);
+                        alunos = buscarAlunos(sala);
+                        atualizarListaDeAlunos(alunos);
+                    }
+                });
+            });
         }
 
-        // Remove destaque antigo
-        document.querySelectorAll('.desk').forEach(d => d.classList.remove('highlight'));
-
-        const sorteadoIndex = Math.floor(Math.random() * alunos.length);
-        const desks = document.querySelectorAll('.desk');
-        desks[sorteadoIndex].classList.add('highlight');
-
-        alunoSorteadoDiv.textContent = `Aluno sorteado: ${alunos[sorteadoIndex]}`;
-      };
-    } else {
-      sortearBtn.style.display = 'none';
-    }
-
-    // Atualiza lista de alunos a cada 5 segundos
-    setInterval(() => {
-      atualizarListaDeAlunos();
-    }, 5000);
-  </script>
+        init();
+    </script>
 </body>
+
 </html>
