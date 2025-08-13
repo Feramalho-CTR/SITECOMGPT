@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entrada do Professor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e8f0fe;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 0 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 400px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            margin-top: 25px;
+            width: 100%;
+            padding: 12px;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #357ae8;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #btnVoltar {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #777;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+        }
+        #btnVoltar:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Entrada do Professor</h1>
+    <form id="professorForm">
+        <label for="nomeSala">Nome da Sala:</label>
+        <input type="text" id="nomeSala" name="nomeSala" required />
+
+        <button type="submit">Criar Sala</button>
+    </form>
+
+    <button id="btnVoltar" onclick="location.href='index.html'">← Voltar ao Início</button>
+
+    <script>
+        function gerarCodigoAleatorio(tamanho = 6) {
+            const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let codigo = '';
+            for (let i = 0; i < tamanho; i++) {
+                codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+            }
+            return codigo;
+        }
+
+        function getSalas() {
+            const salasJSON = localStorage.getItem('salas');
+            return salasJSON ? JSON.parse(salasJSON) : {};
+        }
+
+        function saveSalas(salas) {
+            localStorage.setItem('salas', JSON.stringify(salas));
+        }
+
+        document.getElementById('professorForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const nomeSala = document.getElementById('nomeSala').value.trim();
+
+            if (!nomeSala) {
+                alert('Por favor, preencha o nome da sala.');
+                return;
+            }
+
+            const salas = getSalas();
+
+            // Gera código único (tenta até achar um código não usado)
+            let codigoSala;
+            do {
+                codigoSala = gerarCodigoAleatorio();
+            } while (salas[codigoSala]);
+
+            // Cria a sala com lista vazia de alunos
+            salas[codigoSala] = {
+                nome: nomeSala,
+                alunos: []
+            };
+
+            saveSalas(salas);
+
+            // Redireciona para sala com tipo=professor
+            window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=professor`;
+        });
+    </script>
+</body>
+</html>

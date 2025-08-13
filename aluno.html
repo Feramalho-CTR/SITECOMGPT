@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entrada do Aluno</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff4e5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 0 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 400px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            margin-top: 25px;
+            width: 100%;
+            padding: 12px;
+            background-color: #f4a261;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #e07b39;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #btnVoltar {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #777;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+        }
+        #btnVoltar:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Entrada do Aluno</h1>
+    <form id="alunoForm">
+        <label for="nomeAluno">Nome do Aluno:</label>
+        <input type="text" id="nomeAluno" name="nomeAluno" required />
+
+        <label for="codigoSala">Código da Sala:</label>
+        <input type="text" id="codigoSala" name="codigoSala" required />
+
+        <button type="submit">Entrar</button>
+    </form>
+
+    <button id="btnVoltar" onclick="location.href='index.html'">← Voltar ao Início</button>
+
+    <script>
+        function getSalas() {
+            const salasJSON = localStorage.getItem('salas');
+            return salasJSON ? JSON.parse(salasJSON) : {};
+        }
+
+        function saveSalas(salas) {
+            localStorage.setItem('salas', JSON.stringify(salas));
+        }
+
+        document.getElementById('alunoForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const nomeAluno = document.getElementById('nomeAluno').value.trim();
+            const codigoSala = document.getElementById('codigoSala').value.trim();
+            const errorMsg = document.querySelector('.error');
+            if(errorMsg) errorMsg.textContent = '';
+
+            if (!nomeAluno || !codigoSala) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+
+            const salas = getSalas();
+
+            if (!salas[codigoSala]) {
+                alert('Código da sala não encontrado.');
+                return;
+            }
+
+            // Verifica se o aluno já está cadastrado
+            if (salas[codigoSala].alunos.includes(nomeAluno)) {
+                // Já está cadastrado, só redireciona
+                window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=aluno`;
+                return;
+            }
+
+            // Verifica se tem vaga (limite 30)
+            if (salas[codigoSala].alunos.length >= 30) {
+                alert('Sala cheia! Não é possível entrar.');
+                return;
+            }
+
+            // Adiciona o aluno na sala
+            salas[codigoSala].alunos.push(nomeAluno);
+            saveSalas(salas);
+
+            // Redireciona para a página da sala como aluno
+            window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=aluno`;
+        });
+    </script>
+</body>
+</html>
