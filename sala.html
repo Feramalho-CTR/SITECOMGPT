@@ -16,6 +16,10 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            position: relative;
+            /* Flexbox para empurrar o rodapé para o final */
+            display: flex;
+            flex-direction: column;
         }
 
         #btnVoltar {
@@ -148,6 +152,7 @@
             border: 1px solid #3d4a5c;
             flex-grow: 1;
             margin-top: 0;
+            margin-bottom: auto; /* Empurra o rodapé para baixo */
         }
 
         .desk {
@@ -361,6 +366,15 @@
             overflow: hidden;
             top: -100px;
             left: -100px;
+        }
+        
+        /* Rodapé ajustado */
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(224, 224, 224, 0.5);
+            width: 100%;
         }
 
         /* --- Responsividade para Dispositivos Móveis --- */
@@ -621,7 +635,7 @@
             }
 
             if (tipo === 'professor') {
-                 diminuirVolume();
+                diminuirVolume();
             }
 
             pausarMusicaFundo();
@@ -681,7 +695,7 @@
 
             setTimeout(() => {
                 if (tipo === 'professor') {
-                     aumentarVolume();
+                    aumentarVolume();
                 }
 
                 if (sortearBtn) sortearBtn.disabled = false;
@@ -840,7 +854,7 @@
                     }
 
                     if (tipo === 'professor') {
-                         if (musicaStatusAtual !== ultimoMusicaStatusLido) {
+                        if (musicaStatusAtual !== ultimoMusicaStatusLido) {
                             if (musicaStatusAtual === 'tocando') {
                                 btnMusica.textContent = '🎵 Pausar Música';
                                 tocarMusicaFundo();
@@ -892,6 +906,9 @@
 
         init();
     </script>
+    <footer>
+        <p>&copy; 2024 Desenvolvido por Felipe Ramalho</p>
+    </footer>
 </body>
 
 </html>

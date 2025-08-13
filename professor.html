@@ -16,8 +16,10 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            padding: 0 20px;
+            padding: 0;
             position: relative;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         body::before {
@@ -59,6 +61,7 @@
             text-shadow: 0 0 8px rgba(0, 240, 255, 0.7);
             text-transform: uppercase;
             letter-spacing: 1px;
+            text-align: center; /* Adicionado para centralizar o texto */
         }
 
         .form-container {
@@ -66,7 +69,7 @@
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            width: 100%;
+            width: 90%;
             max-width: 450px;
             border: 1px solid #3d4a5c;
             display: flex;
@@ -96,6 +99,7 @@
             color: #e0e0e0;
             font-size: 16px;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
         }
 
         input[type="text"]:focus {
@@ -130,6 +134,17 @@
             transform: translateY(-3px) scale(1.02);
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 5px rgba(0, 230, 118, 0.6);
         }
+
+        footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(224, 224, 224, 0.5);
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 
@@ -146,7 +161,7 @@
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { ref, push, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        import { ref, push, get, set } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
         // Função para gerar código exclusivo de sala
         function gerarCodigoAleatorio(tamanho = 6) {
@@ -158,29 +173,37 @@
             return codigo;
         }
 
-        // Verifica se o código já existe no Firebase
-        async function salaExisteNoFirebase(codigoSala) {
+        // Cria a sala no Firebase
+        async function criarSalaNoFirebase(nomeSala) {
             const salasRef = ref(db, 'salas');
-            const snapshot = await get(salasRef);
-            if (snapshot.exists()) {
-                const salas = snapshot.val();
-                for (const salaId in salas) {
-                    if (salas[salaId].codigo === codigoSala) {
-                        return true;
-                    }
+
+            let codigoSala;
+            let codigoExiste = true;
+
+            // Loop para garantir um código único
+            while (codigoExiste) {
+                codigoSala = gerarCodigoAleatorio();
+                const snapshot = await get(salasRef);
+                const codigosExistentes = Object.values(snapshot.val() || {}).map(s => s.codigo);
+                if (!codigosExistentes.includes(codigoSala)) {
+                    codigoExiste = false;
                 }
             }
-            return false;
-        }
 
-        // Cria a sala no Firebase
-        async function criarSalaNoFirebase(nomeSala, codigoSala) {
-            const salasRef = ref(db, 'salas');
-            await push(salasRef, {
+            const novaSalaRef = push(salasRef);
+            await set(novaSalaRef, {
                 nome: nomeSala,
                 codigo: codigoSala,
-                alunos: []
+                professor: 'Professor',
+                alunos: [],
+                alunosSorteados: {},
+                ultimoSorteado: null,
+                musicaStatus: 'pausada',
+                sorteando: null,
+                sorteio: null
             });
+            
+            return codigoSala;
         }
 
         document.getElementById('professorForm').addEventListener('submit', async function (event) {
@@ -192,15 +215,13 @@
                 return;
             }
 
-            let codigoSala;
-            do {
-                codigoSala = gerarCodigoAleatorio();
-            } while (await salaExisteNoFirebase(codigoSala));
-
-            await criarSalaNoFirebase(nomeSala, codigoSala);
+            const codigoSala = await criarSalaNoFirebase(nomeSala);
 
             window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=professor`;
         });
     </script>
+    <footer>
+        <p>&copy; 2025 Desenvolvido por Felipe Ramalho</p>
+    </footer>
 </body>
 </html>

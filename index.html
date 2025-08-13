@@ -7,8 +7,8 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a2e; /* Fundo escuro */
-            color: #e0e0e0;
+            background-color: #1a1a2e; /* Fundo escuro e futurista */
+            color: #e0e0e0; /* Cor do texto principal */
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -16,7 +16,7 @@
             justify-content: center;
             height: 100vh;
             text-align: center;
-            overflow: hidden;
+            overflow: hidden; /* Evita barras de rolagem indesejadas */
             position: relative;
         }
 
@@ -28,19 +28,15 @@
             width: 100%;
             height: 100%;
             background-image: 
-                /* Grade horizontal */
                 linear-gradient(to right, transparent 99%, rgba(0, 240, 255, 0.1) 1%), 
-                /* Grade vertical */
                 linear-gradient(to bottom, transparent 99%, rgba(0, 240, 255, 0.1) 1%),
-                /* Brilho central */
                 radial-gradient(circle at center, rgba(0, 240, 255, 0.1), transparent 70%);
-
             background-size: 50px 50px, 50px 50px, 100% 100%;
             background-position: 0 0, 0 0, center center;
             z-index: -1;
-            animation: pulse-glow 15s infinite ease-in-out; /* Animação de brilho */
+            animation: pulse-glow 15s infinite ease-in-out;
         }
-        
+
         @keyframes pulse-glow {
             0% {
                 transform: scale(1);
@@ -60,7 +56,7 @@
             margin-bottom: 35px;
             font-size: 2.5rem;
             color: #ffffff;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7); /* Efeito de brilho */
             text-transform: uppercase;
             letter-spacing: 2px;
         }
@@ -81,15 +77,24 @@
             border: none;
             border-radius: 8px;
             color: #1a1a2e;
-            background: linear-gradient(45deg, #00f0ff, #00e676);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            background: linear-gradient(45deg, #00f0ff, #00e676); /* Gradiente neon */
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); /* Sombra inicial */
             transition: all 0.3s ease;
             text-shadow: none;
             text-transform: uppercase;
         }
         button:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 5px rgba(0, 230, 118, 0.6);
+            transform: translateY(-3px) scale(1.05); /* Efeito de "levantar" e expandir */
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 5px rgba(0, 230, 118, 0.6); /* Brilho mais intenso */
+        }
+
+        footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(224, 224, 224, 0.5);
         }
     </style>
 </head>
@@ -102,5 +107,8 @@
     <script type="module">
         import { app, analytics, db } from './firebase-config.js';
     </script>
+    <footer>
+        <p>&copy; 2025 Desenvolvido por Felipe Ramalho</p>
+    </footer>
 </body>
 </html>

@@ -16,8 +16,10 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            padding: 0 20px;
+            padding: 0; /* Removido o padding para evitar o scroll */
             position: relative;
+            box-sizing: border-box; /* Garante que o padding e a borda sejam incluídos na dimensão total */
+            overflow: hidden; /* Adicionado para evitar o scroll */
         }
 
         body::before {
@@ -66,7 +68,7 @@
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            width: 100%;
+            width: 90%; /* Ajuste para melhor responsividade */
             max-width: 450px;
             border: 1px solid #3d4a5c;
             display: flex;
@@ -96,6 +98,7 @@
             color: #e0e0e0;
             font-size: 16px;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box; /* Adicionado para garantir que o padding não cause overflow */
         }
 
         input[type="text"]:focus {
@@ -130,6 +133,17 @@
             transform: translateY(-3px) scale(1.02);
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 5px rgba(0, 230, 118, 0.6);
         }
+
+        footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(224, 224, 224, 0.5);
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 
@@ -156,8 +170,6 @@
             event.preventDefault();
             const nomeAluno = document.getElementById('nomeAluno').value.trim();
             const codigoSala = document.getElementById('codigoSala').value.trim();
-            const errorMsg = document.querySelector('.error');
-            if (errorMsg) errorMsg.textContent = '';
 
             if (!nomeAluno || !codigoSala) {
                 alert('Por favor, preencha todos os campos.');
@@ -221,5 +233,8 @@
             }
         });
     </script>
+    <footer>
+        <p>&copy; 2025 Desenvolvido por Felipe Ramalho</p>
+    </footer>
 </body>
 </html>
