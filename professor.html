@@ -103,6 +103,7 @@
         import { db } from './firebase-config.js';
         import { ref, push, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
+        // Função para gerar código exclusivo de sala
         function gerarCodigoAleatorio(tamanho = 6) {
             const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let codigo = '';
@@ -112,41 +113,29 @@
             return codigo;
         }
 
-        async function criarSalaNoFirebase(nomeSala, codigoSala) {
-            const salasRef = ref(db, 'salas');
-            try {
-                await push(salasRef, {
-                    nome: nomeSala,
-                    codigo: codigoSala,
-                    alunos: []
-                });
-                console.log('Sala criada no Firebase com sucesso!');
-                return true; // Indica que a sala foi criada com sucesso
-            } catch (error) {
-                console.error("Erro ao criar sala no Firebase: ", error);
-                alert('Erro ao criar sala no Firebase.');
-                return false; // Indica que a sala não foi criada
-            }
-        }
-
+        // Verifica se o código já existe no Firebase
         async function salaExisteNoFirebase(codigoSala) {
             const salasRef = ref(db, 'salas');
-            try {
-                const snapshot = await get(salasRef);
-                if (snapshot.exists()) {
-                    const salas = snapshot.val();
-                    for (const salaId in salas) {
-                        if (salas[salaId].codigo === codigoSala) {
-                            return true; // Sala já existe
-                        }
+            const snapshot = await get(salasRef);
+            if (snapshot.exists()) {
+                const salas = snapshot.val();
+                for (const salaId in salas) {
+                    if (salas[salaId].codigo === codigoSala) {
+                        return true;
                     }
                 }
-                return false; // Sala não existe
-            } catch (error) {
-                console.error("Erro ao verificar sala no Firebase: ", error);
-                alert('Erro ao verificar sala no Firebase.');
-                return true; // Assume que a sala existe para evitar duplicações em caso de erro
             }
+            return false;
+        }
+
+        // Cria a sala no Firebase
+        async function criarSalaNoFirebase(nomeSala, codigoSala) {
+            const salasRef = ref(db, 'salas');
+            await push(salasRef, {
+                nome: nomeSala,
+                codigo: codigoSala,
+                alunos: []
+            });
         }
 
         document.getElementById('professorForm').addEventListener('submit', async function (event) {
@@ -162,15 +151,13 @@
             let codigoSala;
             do {
                 codigoSala = gerarCodigoAleatorio();
-            } while (await salaExisteNoFirebase(codigoSala)); // Verifica no Firebase
+            } while (await salaExisteNoFirebase(codigoSala));
 
             // Cria a sala no Firebase
-            const salaCriada = await criarSalaNoFirebase(nomeSala, codigoSala);
+            await criarSalaNoFirebase(nomeSala, codigoSala);
 
-            // Redireciona para sala com tipo=professor
-            if (salaCriada) {
-                window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=professor`;
-            }
+            // Redireciona para sala com tipo=professor e código exclusivo
+            window.location.href = `sala.html?codigo=${encodeURIComponent(codigoSala)}&tipo=professor`;
         });
     </script>
 </body>

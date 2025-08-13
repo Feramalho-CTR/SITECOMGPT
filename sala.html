@@ -76,11 +76,22 @@
             transition: background-color 0.3s ease;
         }
 
-        .desk.highlight {
-            background-color: #ffd54f;
-            border: 2px solid #ffb300;
-            font-weight: bold;
-            color: #663c00;
+        .desk.sorteado {
+            background-color: #a0d468;
+        }
+
+        .desk.piscar {
+            animation: piscarMesa 0.7s infinite alternate;
+        }
+
+        @keyframes piscarMesa {
+            from {
+                background-color: #ffd54f;
+            }
+
+            to {
+                background-color: #a0d468;
+            }
         }
 
         .table {
@@ -104,30 +115,234 @@
             justify-content: center;
             font-size: 0.9rem;
             color: #333;
+            transition: color 0.3s ease;
         }
 
         #sortearBtn {
-            margin-top: 20px;
-            padding: 12px 20px;
+            padding: 12px 25px;
             font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
             background-color: #4285F4;
             color: white;
             border: none;
             border-radius: 8px;
-            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
         }
 
         #sortearBtn:hover {
             background-color: #357ae8;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
         }
 
-        #alunoSorteado {
-            margin-top: 15px;
-            font-size: 1.3rem;
+        #sortearBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ADICIONE ESTES ESTILOS */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        #btnEncerrarSala {
+            padding: 12px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #d9534f; /* Cor vermelha */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+        }
+
+        #btnEncerrarSala:hover {
+            background-color: #c9302c; /* Vermelho mais escuro */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        #btnEncerrarSala:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        /* FIM DOS ESTILOS ADICIONADOS */
+
+        #encerrarSalaModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #encerrarSalaModalContent {
+            background-color: white;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        #encerrarSalaModalContent p {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #encerrarSalaModal button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: none;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+
+        #btnConfirmarEncerrar {
+            background-color: #d9534f;
+            color: white;
+        }
+        #btnConfirmarEncerrar:hover {
+            background-color: #c9302c;
+        }
+
+        #btnCancelarEncerrar {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+        }
+        #btnCancelarEncerrar:hover {
+            background-color: #e0e0e0;
+        }
+
+        #cardAlunoSorteado {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            font-size: 1.5em;
             font-weight: bold;
             color: #d2691e;
-            min-height: 30px;
+            animation: pulse 1.5s infinite;
+            display: none; /* Começa escondido */
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        /* --- Responsividade para Dispositivos Móveis --- */
+        @media (max-width: 600px) {
+            body {
+                /* Adiciona espaço no fundo para não cobrir as últimas carteiras */
+                padding: 15px 10px 120px 10px;
+            }
+
+            header h1 {
+                font-size: 1.6rem;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            .classroom {
+                /* Força 5 carteiras por linha */
+                grid-template-columns: repeat(5, 1fr);
+                grid-gap: 8px;
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            .action-buttons {
+                /* Fixa os botões na parte inferior da tela */
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                flex-direction: row; /* Garante que fiquem lado a lado */
+                justify-content: center;
+                background-color: #f9f9f9;
+                padding: 15px 10px;
+                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+                margin-top: 0; /* Reseta a margem */
+                z-index: 100;
+            }
+
+            #sortearBtn,
+            #btnEncerrarSala {
+                font-size: 14px;
+                padding: 12px 18px;
+            }
+
+            #cardAlunoSorteado {
+                /* Estilo de modal, igual ao de "encerrar sala" */
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90%;
+                max-width: 400px;
+                background-color: white;
+                padding: 25px 30px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                font-size: 1.5em;
+                text-align: center;
+                /* Remove estilos de tela cheia */
+                height: auto;
+                backdrop-filter: none;
+            }
+
+            /* Ajusta a animação para o estilo de modal */
+            @keyframes pulse {
+                0% {
+                    transform: translate(-50%, -50%) scale(1);
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                }
+                50% {
+                    transform: translate(-50%, -50%) scale(1.05);
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(1);
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                }
+            }
         }
     </style>
 </head>
@@ -144,28 +359,42 @@
         <!-- Mesas e cadeiras geradas aqui -->
     </div>
 
-    <button id="sortearBtn" style="display:none;">Sortear Aluno</button>
-    <div id="alunoSorteado"></div>
+    <div class="action-buttons">
+        <button id="sortearBtn" style="display:none;">Sortear Aluno</button>
+        <button id="btnEncerrarSala" style="display:none;">Encerrar Sala</button>
+    </div>
+
+    <div id="encerrarSalaModal">
+        <div id="encerrarSalaModalContent">
+            <p>Todos os alunos foram sorteados. Deseja encerrar a sala?</p>
+            <button id="btnConfirmarEncerrar">Sim, encerrar a sala</button>
+            <button id="btnCancelarEncerrar">Não, continuar</button>
+        </div>
+    </div>
+
+    <div id="cardAlunoSorteado"></div>
 
     <script type="module">
         import { db } from './firebase-config.js';
-        import { ref, onValue, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+        import { ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
         const params = new URLSearchParams(window.location.search);
         const roomCode = params.get('codigo') || '----';
-        const tipo = params.get('tipo') || 'aluno'; // aluno ou professor
+        const tipo = params.get('tipo') || 'aluno';
 
-        let salaRef;
+        let salaKey = null; // Variável para guardar a chave única da sala
         let alunos = [];
+        let alunosSorteados = {};
+        let ultimoSorteado = null;
 
         function buscarAlunos(sala) {
-            return sala ? sala.alunos || [] : [];
+            const arr = sala && sala.alunos ? sala.alunos.slice(0, 30) : [];
+            while (arr.length < 30) arr.push('');
+            return arr;
         }
 
         function atualizarListaDeAlunos(alunos) {
             const classroom = document.getElementById('classroom');
-
-            // Limpa a lista
             classroom.innerHTML = '';
 
             for (let i = 0; i < 30; i++) {
@@ -181,6 +410,13 @@
                 if (alunos[i]) {
                     chair.textContent = alunos[i];
                     chair.style.color = '#333';
+
+                    if (alunosSorteados[alunos[i]]) {
+                        desk.classList.add('sorteado');
+                    }
+                    if (alunos[i] === ultimoSorteado) {
+                        desk.classList.add('piscar');
+                    }
                 } else {
                     chair.textContent = i + 1;
                     chair.style.color = '#bbb';
@@ -192,62 +428,147 @@
             }
         }
 
-        // Atualiza os nomes da sala e código no header
         function atualizarHeader(sala) {
             const roomName = document.getElementById('roomName');
             const roomCodeEl = document.getElementById('roomCode');
 
             if (sala) {
-                roomName.textContent = `Sala: ${sala.nome}`;
-                roomCodeEl.textContent = `Código da Sala: ${roomCode}`;
+                roomName.textContent = `Sala: ${sala.nome || '--'}`;
+                roomCodeEl.textContent = `Código da Sala: ${sala.codigo || '--'}`;
             } else {
                 roomName.textContent = 'Sala não encontrada';
-                roomCodeEl.textContent = `Código da Sala: ${roomCode}`;
+                roomCodeEl.textContent = 'Código da Sala: --';
             }
         }
 
-        function sortearAluno() {
-            if (alunos.length === 0) {
-                alert('Nenhum aluno cadastrado para sortear.');
+        async function sortearAluno() {
+            if (!salaKey) {
+                alert("A sala não foi encontrada. Não é possível sortear.");
+                return;
+            }
+            const totalAlunosNaSala = alunos.filter(aluno => aluno).length;
+            if (totalAlunosNaSala === 0) {
+                alert("Não há alunos na sala para sortear.");
                 return;
             }
 
-            // Remove destaque antigo
-            document.querySelectorAll('.desk').forEach(d => d.classList.remove('highlight'));
+            let alunosDisponiveis = alunos.filter(aluno => aluno && !alunosSorteados[aluno]);
 
-            const sorteadoIndex = Math.floor(Math.random() * alunos.length);
-            const desks = document.querySelectorAll('.desk');
-            desks[sorteadoIndex].classList.add('highlight');
+            if (alunosDisponiveis.length === 0) {
+                exibirModalEncerrarSala();
+                return;
+            }
 
-            alunoSorteadoDiv.textContent = `Aluno sorteado: ${alunos[sorteadoIndex]}`;
+            const alunoSorteado = alunosDisponiveis[Math.floor(Math.random() * alunosDisponiveis.length)];
+            
+            const salaRefKey = ref(db, `salas/${salaKey}`);
+            await update(salaRefKey, { 
+                alunosSorteados: { ...alunosSorteados, [alunoSorteado]: true }, 
+                ultimoSorteado: alunoSorteado,
+                sorteio: alunoSorteado // Controla o card e o piscar
+            });
+
+            setTimeout(() => {
+                update(salaRefKey, { ultimoSorteado: null, sorteio: null });
+            }, 5000);
+        }
+
+        function exibirCardAlunoSorteado(alunoSorteado) {
+            let card = document.getElementById('cardAlunoSorteado');
+            if (card) {
+                card.textContent = `Aluno Sorteado: ${alunoSorteado}`;
+                card.style.display = 'block';
+            }
+        }
+
+        function ocultarCardAlunoSorteado() {
+            const card = document.getElementById('cardAlunoSorteado');
+            if (card) {
+                card.style.display = 'none';
+            }
+        }
+
+        function exibirModalEncerrarSala() {
+            const modal = document.getElementById('encerrarSalaModal');
+            modal.style.display = 'flex';
+        }
+
+        function ocultarModalEncerrarSala() {
+            const modal = document.getElementById('encerrarSalaModal');
+            modal.style.display = 'none';
         }
 
         const sortearBtn = document.getElementById('sortearBtn');
-        const alunoSorteadoDiv = document.getElementById('alunoSorteado');
+        const btnEncerrarSala = document.getElementById('btnEncerrarSala');
+        const btnConfirmarEncerrar = document.getElementById('btnConfirmarEncerrar');
+        const btnCancelarEncerrar = document.getElementById('btnCancelarEncerrar');
 
-        // Mostra botão só para professor
         if (tipo === 'professor') {
             sortearBtn.style.display = 'inline-block';
+            btnEncerrarSala.style.display = 'inline-block';
 
-            sortearBtn.onclick = () => {
-                sortearAluno();
+            sortearBtn.onclick = () => sortearAluno();
+            btnEncerrarSala.onclick = () => exibirModalEncerrarSala();
+
+            btnConfirmarEncerrar.onclick = async () => {
+                if (!salaKey) return; // Não faz nada se a chave da sala não for encontrada
+                try {
+                    // 1. Apaga todas as informações da sala do Firebase
+                    await remove(ref(db, `salas/${salaKey}`));
+                    
+                    alert('Sala encerrada com sucesso!');
+                    
+                    // 2. Redireciona para a página inicial
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error("Erro ao encerrar a sala: ", error);
+                    alert('Erro ao encerrar a sala.');
+                }
             };
+
+            btnCancelarEncerrar.onclick = () => ocultarModalEncerrarSala();
         } else {
             sortearBtn.style.display = 'none';
+            btnEncerrarSala.style.display = 'none';
         }
 
-        // Inicialização e Listener do Firebase
         function init() {
-            salaRef = ref(db, 'salas');
-            onValue(salaRef, (snapshot) => {
+            const salasRef = ref(db, 'salas');
+            onValue(salasRef, (snapshot) => {
+                let salaEncontrada = null;
+                let chaveEncontrada = null;
                 snapshot.forEach((childSnapshot) => {
                     const sala = childSnapshot.val();
                     if (sala.codigo === roomCode) {
-                        atualizarHeader(sala);
-                        alunos = buscarAlunos(sala);
-                        atualizarListaDeAlunos(alunos);
+                        salaEncontrada = sala;
+                        chaveEncontrada = childSnapshot.key;
                     }
                 });
+
+                salaKey = chaveEncontrada;
+
+                if (salaEncontrada) {
+                    atualizarHeader(salaEncontrada);
+                    alunos = buscarAlunos(salaEncontrada);
+                    alunosSorteados = salaEncontrada.alunosSorteados || {};
+                    ultimoSorteado = salaEncontrada.ultimoSorteado || null;
+                    atualizarListaDeAlunos(alunos);
+
+                    // Controla o card do sorteado
+                    if (salaEncontrada.sorteio) {
+                        exibirCardAlunoSorteado(salaEncontrada.sorteio);
+                    } else {
+                        ocultarCardAlunoSorteado();
+                    }
+                } else {
+                    salaKey = null;
+                    atualizarHeader(null);
+                    alunos = buscarAlunos({});
+                    alunosSorteados = {};
+                    ultimoSorteado = null;
+                    atualizarListaDeAlunos(alunos);
+                    ocultarCardAlunoSorteado();
+                }
             });
         }
 
