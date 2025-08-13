@@ -319,26 +319,34 @@
         }
 
         #cardMusica {
-            position: fixed;
+            position: absolute;
             top: 20px;
             right: 20px;
             background-color: #2b2b45;
             border: 1px solid #00f0ff;
             border-radius: 8px;
-            padding: 10px 15px;
+            padding: 8px 12px;
             color: #e0e0e0;
             font-size: 0.9em;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             z-index: 999;
             transition: opacity 0.3s ease;
+            max-width: 200px;
+            overflow: hidden;
         }
 
-        #cardMusica img {
-            height: 24px;
-            width: 24px;
+        #musicaTitulo {
+            white-space: nowrap;
+            position: relative;
+            animation: marquee 10s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
 
         #youtube-player-container {
@@ -405,11 +413,7 @@
                 font-size: 0.8em;
                 padding: 8px 12px;
                 gap: 8px;
-            }
-
-            #cardMusica img {
-                height: 20px;
-                width: 20px;
+                max-width: 150px;
             }
         }
     </style>
@@ -450,7 +454,7 @@
     <audio id="somFinal" src="./sons/winning-218995.mp3" preload="auto"></audio>
 
     <div id="youtube-player-container">
-        <div id="youtube-player"></div>
+        <div id="youtube-player">36YnV9STBqc</div>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -477,12 +481,10 @@
         const musicaTitulo = document.getElementById('musicaTitulo');
         const btnMusica = document.getElementById('btnMusica');
         let youtubePlayer;
+        let playerReady = false;
 
         const youtubeVideoId = '36YnV9STBqc';
 
-        // -----------------------------------------------------------
-        // LÓGICA DA API DO YOUTUBE
-        // -----------------------------------------------------------
         window.onYouTubeIframeAPIReady = function () {
             youtubePlayer = new YT.Player('youtube-player', {
                 height: '0',
@@ -502,6 +504,7 @@
         };
 
         function onPlayerReady(event) {
+            playerReady = true;
             try {
                 const videoData = event.target.getVideoData();
                 musicaTitulo.textContent = videoData && videoData.title ? videoData.title : 'Música de Fundo';
@@ -510,10 +513,14 @@
                 console.error("Erro ao obter o título do vídeo:", e);
             }
             event.target.setVolume(30);
+
+            if (musicaStatusFirebase === 'tocando' && tipo === 'aluno' && !animacaoEmAndamento) {
+                tocarMusicaFundo();
+            }
         }
 
         function pausarMusicaFundo() {
-            if (youtubePlayer && typeof youtubePlayer.pauseVideo === 'function' && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+            if (playerReady && youtubePlayer && typeof youtubePlayer.pauseVideo === 'function' && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
                 youtubePlayer.pauseVideo();
                 cardMusica.style.opacity = '0.5';
                 if (tipo === 'professor') {
@@ -523,7 +530,7 @@
         }
 
         function tocarMusicaFundo() {
-            if (youtubePlayer && typeof youtubePlayer.playVideo === 'function' && youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+            if (playerReady && youtubePlayer && typeof youtubePlayer.playVideo === 'function' && youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
                 youtubePlayer.playVideo().catch(e => console.error("Erro ao tocar a música:", e));
                 cardMusica.style.opacity = '1';
                 if (tipo === 'professor') {
@@ -531,9 +538,6 @@
                 }
             }
         }
-        // -----------------------------------------------------------
-        // FIM DA LÓGICA DA API DO YOUTUBE
-        // -----------------------------------------------------------
 
         function buscarAlunos(sala) {
             const arr = sala && sala.alunos ? sala.alunos.slice(0, 30) : [];
@@ -700,17 +704,19 @@
             sortearBtn.onclick = sortearAluno;
             btnEncerrarSala.onclick = () => exibirModalEncerrarSala();
 
+            // Lógica ajustada do botão de música
             btnMusica.onclick = () => {
-                if (!salaKey) return;
-                const novoStatus = musicaStatusFirebase === 'tocando' ? 'pausada' : 'tocando';
-                // O play/pause real só acontece aqui, com a interação do usuário.
-                if (novoStatus === 'tocando') {
-                    tocarMusicaFundo();
-                } else {
-                    pausarMusicaFundo();
-                }
-                update(ref(db, `salas/${salaKey}`), { musicaStatus: novoStatus });
-            };
+                    if (!salaKey) return;
+                    const novoStatus = musicaStatusFirebase === 'tocando' ? 'pausada' : 'tocando';
+
+                    if (novoStatus === 'tocando') {
+                        tocarMusicaFundo(); // Toca a música imediatamente
+                    } else {
+                        pausarMusicaFundo(); // Pausa a música imediatamente
+                    }
+                    
+                    update(ref(db, `salas/${salaKey}`), { musicaStatus: novoStatus }); // Sincroniza o estado com o Firebase
+                };
 
             btnConfirmarEncerrar.onclick = async () => {
                 if (!salaKey) return;
@@ -775,48 +781,31 @@
                     alunos = buscarAlunos(salaEncontrada);
                     alunosSorteados = salaEncontrada.alunosSorteados || {};
 
-                    // Salva o último sorteado antes de atualizar a lista de alunos
                     const ultimoSorteadoAnterior = ultimoSorteado;
                     ultimoSorteado = salaEncontrada.ultimoSorteado || null;
 
                     atualizarListaDeAlunos(alunos);
 
-                    // --- Lógica para o card de piscar do último sorteado ---
                     const desks = document.querySelectorAll('.desk');
-                    // Remove a classe de piscar de todas as mesas
                     desks.forEach(desk => desk.classList.remove('piscar'));
 
-                    // Se houver um último sorteado, adiciona a classe de piscar na mesa correspondente
                     if (ultimoSorteado && !animacaoEmAndamento) {
                         const deskDoSorteado = Array.from(desks).find(d => d.querySelector('.chair').textContent === ultimoSorteado);
                         if (deskDoSorteado) {
                             deskDoSorteado.classList.add('piscar');
                         }
                     }
-                    // --- Fim da lógica do card de piscar ---
 
-                    // --- LÓGICA CORRIGIDA PARA A MÚSICA ---
                     musicaStatusFirebase = salaEncontrada.musicaStatus || 'pausada';
-                    
-                    if (tipo === 'professor') {
-                        // Apenas atualiza a interface para o professor, sem tentar dar autoplay
-                        if (musicaStatusFirebase === 'tocando') {
-                            btnMusica.textContent = '🎵 Pausar Música';
-                            cardMusica.style.opacity = '1';
-                        } else {
-                            btnMusica.textContent = '🎵 Tocar Música';
-                            cardMusica.style.opacity = '0.5';
-                        }
-                    } else {
-                        // Sincroniza o estado da música para os alunos
-                        if (musicaStatusFirebase === 'tocando' && !animacaoEmAndamento) {
+
+                    // O listener do Firebase agora só atualiza o estado visual e reage a mudanças de outros usuários
+                    if (playerReady) {
+                        if (musicaStatusFirebase === 'tocando' && youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
                             tocarMusicaFundo();
-                        } else {
+                        } else if (musicaStatusFirebase === 'pausada' && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
                             pausarMusicaFundo();
                         }
                     }
-                    // --- FIM DA LÓGICA CORRIGIDA ---
-
 
                     const sorteandoAluno = salaEncontrada.sorteando || null;
                     desks.forEach(desk => desk.classList.remove('sorteando'));
@@ -842,7 +831,7 @@
                         pausarMusicaFundo();
                     } else {
                         ocultarCardAlunoSorteado();
-                        if (!sorteandoAluno && musicaStatusFirebase === 'tocando') {
+                        if (!sorteandoAluno && musicaStatusFirebase === 'tocando' && playerReady) {
                             tocarMusicaFundo();
                         }
                     }
