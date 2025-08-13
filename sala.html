@@ -345,8 +345,13 @@
         }
 
         @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
         }
 
         #youtube-player-container {
@@ -472,7 +477,13 @@
         let alunosSorteados = {};
         let ultimoSorteado = null;
         let musicaStatusFirebase = 'pausada';
+        let ultimoMusicaStatusLido = null;
         let animacaoEmAndamento = false;
+        
+        let hasUserInteracted = false;
+
+        const volumeNormal = 30; // Volume padrão
+        const volumeBaixo = 5; // Volume durante o sorteio
 
         const somContagem = document.getElementById('somContagem');
         const somFinal = document.getElementById('somFinal');
@@ -512,30 +523,37 @@
                 musicaTitulo.textContent = 'Música de Fundo';
                 console.error("Erro ao obter o título do vídeo:", e);
             }
-            event.target.setVolume(30);
-
-            if (musicaStatusFirebase === 'tocando' && tipo === 'aluno' && !animacaoEmAndamento) {
-                tocarMusicaFundo();
+            if (tipo === 'professor') {
+                event.target.setVolume(volumeNormal);
+            }
+        }
+        
+        function diminuirVolume() {
+            if (tipo === 'professor' && playerReady && youtubePlayer) {
+                youtubePlayer.setVolume(volumeBaixo);
+            }
+        }
+        
+        function aumentarVolume() {
+            if (tipo === 'professor' && playerReady && youtubePlayer) {
+                youtubePlayer.setVolume(volumeNormal);
             }
         }
 
         function pausarMusicaFundo() {
-            if (playerReady && youtubePlayer && typeof youtubePlayer.pauseVideo === 'function' && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+            if (tipo === 'professor' && playerReady && youtubePlayer && typeof youtubePlayer.pauseVideo === 'function' && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
                 youtubePlayer.pauseVideo();
                 cardMusica.style.opacity = '0.5';
-                if (tipo === 'professor') {
-                    btnMusica.textContent = '🎵 Tocar Música';
-                }
             }
         }
 
         function tocarMusicaFundo() {
-            if (playerReady && youtubePlayer && typeof youtubePlayer.playVideo === 'function' && youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
-                youtubePlayer.playVideo().catch(e => console.error("Erro ao tocar a música:", e));
-                cardMusica.style.opacity = '1';
-                if (tipo === 'professor') {
-                    btnMusica.textContent = '🎵 Pausar Música';
-                }
+            if (tipo === 'professor' && playerReady && youtubePlayer && hasUserInteracted && youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+                youtubePlayer.playVideo().then(() => {
+                    cardMusica.style.opacity = '1';
+                }).catch(e => {
+                    console.warn("Reprodução automática bloqueada mesmo após interação do usuário:", e);
+                });
             }
         }
 
@@ -602,6 +620,10 @@
                 return;
             }
 
+            if (tipo === 'professor') {
+                 diminuirVolume();
+            }
+
             pausarMusicaFundo();
 
             sortearBtn.disabled = true;
@@ -658,6 +680,10 @@
             }
 
             setTimeout(() => {
+                if (tipo === 'professor') {
+                     aumentarVolume();
+                }
+
                 if (sortearBtn) sortearBtn.disabled = false;
                 if (salaKey) {
                     update(ref(db, `salas/${salaKey}`), { ultimoSorteado: null, sorteio: null });
@@ -704,19 +730,23 @@
             sortearBtn.onclick = sortearAluno;
             btnEncerrarSala.onclick = () => exibirModalEncerrarSala();
 
-            // Lógica ajustada do botão de música
             btnMusica.onclick = () => {
-                    if (!salaKey) return;
-                    const novoStatus = musicaStatusFirebase === 'tocando' ? 'pausada' : 'tocando';
-
-                    if (novoStatus === 'tocando') {
-                        tocarMusicaFundo(); // Toca a música imediatamente
-                    } else {
-                        pausarMusicaFundo(); // Pausa a música imediatamente
-                    }
-                    
-                    update(ref(db, `salas/${salaKey}`), { musicaStatus: novoStatus }); // Sincroniza o estado com o Firebase
-                };
+                if (!salaKey || !playerReady) return;
+                
+                hasUserInteracted = true;
+                
+                const novoStatus = musicaStatusFirebase === 'tocando' ? 'pausada' : 'tocando';
+                
+                if (novoStatus === 'tocando') {
+                    btnMusica.textContent = '🎵 Pausar Música';
+                    tocarMusicaFundo();
+                } else {
+                    btnMusica.textContent = '🎵 Tocar Música';
+                    pausarMusicaFundo();
+                }
+                
+                update(ref(db, `salas/${salaKey}`), { musicaStatus: novoStatus });
+            };
 
             btnConfirmarEncerrar.onclick = async () => {
                 if (!salaKey) return;
@@ -752,12 +782,23 @@
 
                 iniciarAnimacaoSorteio(alunosDisponiveis);
             }
-
         } else {
             sortearBtn.style.display = 'none';
             btnEncerrarSala.style.display = 'none';
             btnMusica.style.display = 'none';
         }
+
+        const initialInteractionListener = () => {
+            if (!hasUserInteracted) {
+                hasUserInteracted = true;
+                document.body.removeEventListener('click', initialInteractionListener);
+                document.body.removeEventListener('touchend', initialInteractionListener);
+            }
+        };
+
+        document.body.addEventListener('click', initialInteractionListener);
+        document.body.addEventListener('touchend', initialInteractionListener);
+
 
         function init() {
             cardMusica.style.display = 'flex';
@@ -780,9 +821,11 @@
                     atualizarHeader(salaEncontrada);
                     alunos = buscarAlunos(salaEncontrada);
                     alunosSorteados = salaEncontrada.alunosSorteados || {};
-
-                    const ultimoSorteadoAnterior = ultimoSorteado;
                     ultimoSorteado = salaEncontrada.ultimoSorteado || null;
+                    
+                    const sorteandoAluno = salaEncontrada.sorteando || null;
+                    const sorteioFinalizado = salaEncontrada.sorteio;
+                    const musicaStatusAtual = salaEncontrada.musicaStatus || 'pausada';
 
                     atualizarListaDeAlunos(alunos);
 
@@ -796,45 +839,45 @@
                         }
                     }
 
-                    musicaStatusFirebase = salaEncontrada.musicaStatus || 'pausada';
-
-                    // O listener do Firebase agora só atualiza o estado visual e reage a mudanças de outros usuários
-                    if (playerReady) {
-                        if (musicaStatusFirebase === 'tocando' && youtubePlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
-                            tocarMusicaFundo();
-                        } else if (musicaStatusFirebase === 'pausada' && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
-                            pausarMusicaFundo();
+                    if (tipo === 'professor') {
+                         if (musicaStatusAtual !== ultimoMusicaStatusLido) {
+                            if (musicaStatusAtual === 'tocando') {
+                                btnMusica.textContent = '🎵 Pausar Música';
+                                tocarMusicaFundo();
+                            } else {
+                                btnMusica.textContent = '🎵 Tocar Música';
+                                pausarMusicaFundo();
+                            }
+                        }
+                        
+                        if (sorteandoAluno || sorteioFinalizado) {
+                            diminuirVolume();
+                        } else if (musicaStatusAtual === 'tocando') {
+                            aumentarVolume();
                         }
                     }
+                    
+                    ultimoMusicaStatusLido = musicaStatusAtual;
+                    musicaStatusFirebase = musicaStatusAtual;
 
-                    const sorteandoAluno = salaEncontrada.sorteando || null;
                     desks.forEach(desk => desk.classList.remove('sorteando'));
-
                     if (sorteandoAluno) {
                         const deskSorteando = Array.from(desks).find(d => d.querySelector('.chair').textContent === sorteandoAluno);
                         if (deskSorteando) {
                             deskSorteando.classList.add('sorteando');
-                            if (tipo !== 'professor') {
-                                somContagem.currentTime = 0;
-                                somContagem.play().catch(e => console.error("Erro ao tocar o som de contagem:", e));
-                            }
-                            pausarMusicaFundo();
+                            somContagem.currentTime = 0;
+                            somContagem.play().catch(e => console.error("Erro ao tocar o som de contagem:", e));
                         }
                     }
 
-                    if (salaEncontrada.sorteio) {
-                        exibirCardAlunoSorteado(salaEncontrada.sorteio);
-                        if (tipo !== 'professor') {
-                            somFinal.volume = 0.5;
-                            somFinal.play().catch(e => console.error("Erro ao tocar o som final:", e));
-                        }
-                        pausarMusicaFundo();
+                    if (sorteioFinalizado) {
+                        exibirCardAlunoSorteado(sorteioFinalizado);
+                        somFinal.volume = 0.5;
+                        somFinal.play().catch(e => console.error("Erro ao tocar o som final:", e));
                     } else {
                         ocultarCardAlunoSorteado();
-                        if (!sorteandoAluno && musicaStatusFirebase === 'tocando' && playerReady) {
-                            tocarMusicaFundo();
-                        }
                     }
+
                 } else {
                     salaKey = null;
                     atualizarHeader(null);
